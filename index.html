@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CampusVFX Alumni Base</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Fonts similar to Softr design -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap base -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="bg-black text-light">
+
+  <!-- Top nav -->
+<nav class="navbar navbar-dark bg-black border-bottom border-dark px-4 py-3">
+  <a class="navbar-brand d-flex align-items-center" href="/" aria-label="CampusVFX home">
+    <img 
+      src="https://raw.githubusercontent.com/kaustubhfx/images/main/campusvfxlogo.png"
+      alt="Logo"
+      style="height: 40px; width: auto; margin-right: 10px;"
+    >
+  </a>
+  <div class="ms-auto">
+    <a href="https://forms.gle/1huriRqfSVBVDqHQ9"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="btn btn-primary rounded-pill px-4">
+      Graduates
+    </a>
+  </div>
+</nav>
+
+
+  <main>
+    <!-- HERO -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <h1 class="hero-title mb-4">
+          Empower Your<br>Career Connections
+        </h1>
+        <p class="hero-subtitle mb-4">
+          Build, showcase, and connect with talent worldwide effortlessly.
+        </p>
+        <a href="#graduates" class="btn hero-cta rounded-pill">
+          Join Now
+        </a>
+      </div>
+
+      <div class="col-lg-6 d-flex justify-content-center">
+        <!-- Placeholder illustration box -->
+        <div style="
+          width: 420px;
+          max-width: 100%;
+          height: 260px;
+          border-radius: 32px;
+          background: radial-gradient(circle at top left,#fbbf77,#f472b6,#4f46e5);
+          position: relative;
+          overflow: hidden;">
+          <!-- you can swap this for your SVG later -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRADUATES SECTION -->
+<section id="graduates" class="section-dark border-top border-dark">
+  <div class="container">
+
+    <div class="mb-4">
+      <h2 class="section-title mb-1">Graduates</h2>
+      <p class="section-subtitle">
+        A database of graduate profiles for recruitment purposes.
+      </p>
+    </div>
+
+    <!-- Search & filter row -->
+          <div class="d-flex flex-column flex-md-row gap-4 mb-4 align-items-stretch">
+
+    <!-- Search -->
+    <input id="searchInput" 
+           type="text" 
+           class="form-control bg-dark text-light border-secondary" 
+           placeholder="Search by name, discipline…">
+
+    <!-- Filter by Discipline -->
+    <select id="filterDiscipline" class="form-select bg-dark text-light border-secondary">
+        <option value="">All Disciplines</option>
+    </select>
+
+    <!-- Filter by Country -->
+    <select id="filterCountry" class="form-select bg-dark text-light border-secondary">
+        <option value="">All Countries</option>
+    </select>
+
+    <!-- Filter by Graduation Year -->
+    <select id="filterYear" class="form-select bg-dark text-light border-secondary">
+        <option value="">All Years</option>
+    </select>
+
+</div>
+
+
+    <!-- Cards grid -->
+    <div class="row g-4" id="cardsContainer"></div>
+
+  </div>
+</section>
+
+
+
+<script>
+  // 👉 Paste your SCRIPT_URL here
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykI5dFrRmQpqViEx4SpgpaWYVBssUxrpEMzUt7nRPP-XVYckXNLTmXKEgGbf12HFQh/exec";
+
+  let ALL_GRADS = [];
+  let ACTIVE_TAGS = new Set();
+
+  const cardsContainer = document.getElementById("cardsContainer");
+  const searchInput = document.getElementById("searchInput");
+  const filterDiscipline = document.getElementById("filterDiscipline");
+  const filterCountry = document.getElementById("filterCountry");
+  const filterYear = document.getElementById("filterYear");
+
+  // fail fast if required elements are not present in the DOM
+  if (!cardsContainer || !searchInput || !filterDiscipline || !filterCountry || !filterYear) {
+    console.error("Required DOM elements not found; aborting grads script.");
+  } else {
+    // Wire up inputs
+    searchInput.addEventListener("input", renderCards);
+    filterDiscipline.addEventListener("change", renderCards);
+    filterCountry.addEventListener("change", renderCards);
+    filterYear.addEventListener("change", renderCards);
+
+    // Fetch data once and initialize
+    fetch(SCRIPT_URL)
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(data => {
+        ALL_GRADS = Array.isArray(data) ? data : [];
+        populateFilters(ALL_GRADS);
+        renderCards();
+      })
+      .catch(err => console.error("Error fetching grads:", err));
+  }
+
+  // Populate the three filter <select>s
+  function populateFilters(data) {
+    const disciplines = new Set();
+    const countries = new Set();
+    const years = new Set();
+
+    data.forEach(g => {
+      if (g.Discipline) disciplines.add(String(g.Discipline).trim());
+      if (g.Citizenship) countries.add(String(g.Citizenship).trim());
+      if (g.GraduationYear) years.add(String(g.GraduationYear).trim());
+    });
+
+    // helper to fill a select (keeps the existing first option)
+    function fill(selectEl, values) {
+      // remove all options except the first
+      while (selectEl.options.length > 1) selectEl.remove(1);
+      Array.from(values).sort().forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    fill(filterDiscipline, disciplines);
+    fill(filterCountry, countries);
+    fill(filterYear, years);
+  }
+
+  // Create and append a single graduate card
+  function renderCard(g) {
+    const imgUrl =
+      g.ImageURL ||
+      g.ImageUrl ||
+      g.Imageurl ||
+      g.imageURL ||
+      g.imageUrl ||
+      g.imageurl ||
+      "";
+
+    const gradYear = g.GraduationYear || "";
+    const detailUrl = "graduate.html?id=" + encodeURIComponent(g.ID || "");
+
+    const col = document.createElement("div");
+    col.className = "col-12 col-sm-6 col-md-4 col-lg-3";
+
+    col.innerHTML = `
+      <a href="${detailUrl}" class="text-decoration-none text-light">
+        <div class="grad-card h-100">
+          <div class="grad-image" style="${imgUrl ? "background-image:url('" + imgUrl + "')" : ""}">
+            ${gradYear ? `<div class="grad-pill">Graduated in ${gradYear}</div>` : ""}
+            ${!imgUrl ? `<div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                           <span class="fs-2">🖼️</span>
+                         </div>` : ""}
+          </div>
+          <div class="grad-body">
+            <div class="mb-2">
+              <div><strong>Name:</strong> ${g.Name || ""}</div>
+              <div><strong>Discipline:</strong> ${g.Discipline || ""}</div>
+              <div><strong>Citizenship:</strong> ${g.Citizenship || ""}</div>
+            </div>
+            <div class="grad-links d-flex gap-3">
+              ${g.LinkedIn ? `<a href="${g.LinkedIn}" target="_blank" rel="noopener">LinkedIn</a>` : ""}
+              ${g.Reel ? `<a href="${g.Reel}" target="_blank" rel="noopener">Showreel</a>` : ""}
+              ${g.Resume ? `<a href="${g.Resume}" target="_blank" rel="noopener">Resume</a>` : ""}
+            </div>
+          </div>
+        </div>
+      </a>
+    `;
+
+    cardsContainer.appendChild(col);
+  }
+
+  // Render cards using ALL_GRADS and current filters/search
+  function renderCards() {
+    const q = (searchInput.value || "").trim().toLowerCase();
+    const selectedDiscipline = (filterDiscipline.value || "").toLowerCase();
+    const selectedCountry = (filterCountry.value || "").toLowerCase();
+    const selectedYear = (filterYear.value || "").toLowerCase();
+
+    cardsContainer.innerHTML = "";
+
+    if (!Array.isArray(ALL_GRADS)) return;
+
+    ALL_GRADS
+      .filter(g => {
+        const blob = [
+          g.Name,
+          g.Discipline,
+          g.Citizenship,
+          g.GraduationYear,
+          g.PreferredCountry
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = !q || blob.includes(q);
+        const matchesDiscipline = !selectedDiscipline || String(g.Discipline || "").toLowerCase() === selectedDiscipline;
+        const matchesCountry = !selectedCountry || String(g.Citizenship || "").toLowerCase() === selectedCountry;
+        const matchesYear = !selectedYear || String(g.GraduationYear || "").toLowerCase() === selectedYear;
+
+        return matchesSearch && matchesDiscipline && matchesCountry && matchesYear;
+      })
+      .forEach(g => renderCard(g));
+  }
+</script>
+
+
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
