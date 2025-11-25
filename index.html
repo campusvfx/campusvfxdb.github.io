@@ -12,7 +12,7 @@ title: CampusVFX Alumni Base
           Empower Your<br>Career Connections
         </h1>
         <p class="hero-subtitle mb-4">
-          Build, showcase, and connect with talent worldwide effortlessly.
+         A database of graduate profiles for recruitment purposes.
         </p>
         <a href="#graduates" class="btn hero-cta rounded-pill">
           Join Now
@@ -54,7 +54,7 @@ title: CampusVFX Alumni Base
     <input id="searchInput" 
            type="text" 
            class="form-control bg-dark text-light border-secondary" 
-           placeholder="Search by name, discipline…">
+           placeholder="Search by name">
 
     <!-- Filter by Discipline -->
     <select id="filterDiscipline" class="form-select bg-dark text-light border-secondary">
@@ -137,7 +137,7 @@ title: CampusVFX Alumni Base
       if (g.Discipline) disciplines.add(String(g.Discipline).trim());
       if (g.Citizenship) countries.add(String(g.Citizenship).trim());
       if (g.GraduationYear) years.add(String(g.GraduationYear).trim());
-      if (g.Availaibility) years.add(String(g.Availaibility).trim());
+      if (g.Availaibility) availaibility.add(String(g.Availaibility).trim());
     });
 
     // helper to fill a select (keeps the existing first option)
