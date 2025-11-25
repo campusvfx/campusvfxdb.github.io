@@ -58,17 +58,22 @@ title: CampusVFX Alumni Base
 
     <!-- Filter by Discipline -->
     <select id="filterDiscipline" class="form-select bg-dark text-light border-secondary">
-        <option value="">All Disciplines</option>
+        <option value="">Disciplines</option>
     </select>
 
     <!-- Filter by Country -->
     <select id="filterCountry" class="form-select bg-dark text-light border-secondary">
-        <option value="">All Countries</option>
+        <option value="">Countries</option>
     </select>
 
     <!-- Filter by Graduation Year -->
     <select id="filterYear" class="form-select bg-dark text-light border-secondary">
-        <option value="">All Years</option>
+        <option value="">Graduated in</option>
+    </select>
+
+    <!-- Filter by Availaibility -->
+    <select id="filterAvailaibility" class="form-select bg-dark text-light border-secondary">
+        <option value="">Availaibility</option>
     </select>
 
 </div>
@@ -94,6 +99,7 @@ title: CampusVFX Alumni Base
   const filterDiscipline = document.getElementById("filterDiscipline");
   const filterCountry = document.getElementById("filterCountry");
   const filterYear = document.getElementById("filterYear");
+  const filterAvailaibility = document.getElementById("filterAvailaibility");
 
   // fail fast if required elements are not present in the DOM
   if (!cardsContainer || !searchInput || !filterDiscipline || !filterCountry || !filterYear) {
@@ -104,7 +110,8 @@ title: CampusVFX Alumni Base
     filterDiscipline.addEventListener("change", renderCards);
     filterCountry.addEventListener("change", renderCards);
     filterYear.addEventListener("change", renderCards);
-
+    filterAvailaibility.addEventListener("change", renderCards);
+    
     // Fetch data once and initialize
     fetch(SCRIPT_URL)
       .then(response => {
@@ -124,11 +131,13 @@ title: CampusVFX Alumni Base
     const disciplines = new Set();
     const countries = new Set();
     const years = new Set();
-
+    const availaibility = new Set();
+    
     data.forEach(g => {
       if (g.Discipline) disciplines.add(String(g.Discipline).trim());
       if (g.Citizenship) countries.add(String(g.Citizenship).trim());
       if (g.GraduationYear) years.add(String(g.GraduationYear).trim());
+      if (g.Availaibility) years.add(String(g.Availaibility).trim());
     });
 
     // helper to fill a select (keeps the existing first option)
@@ -146,6 +155,7 @@ title: CampusVFX Alumni Base
     fill(filterDiscipline, disciplines);
     fill(filterCountry, countries);
     fill(filterYear, years);
+    fill(filterAvailaibility, availaibility);
   }
 
   // Create and append a single graduate card
@@ -179,6 +189,7 @@ title: CampusVFX Alumni Base
               <div><strong>Name:</strong> ${g.Name || ""}</div>
               <div><strong>Discipline:</strong> ${g.Discipline || ""}</div>
               <div><strong>Citizenship:</strong> ${g.Citizenship || ""}</div>
+              <div><strong>Availaibility:</strong> ${g.Availaibility || ""}</div>
             </div>
             <div class="grad-links d-flex gap-3">
               ${g.LinkedIn ? `<a href="${g.LinkedIn}" target="_blank" rel="noopener">LinkedIn</a>` : ""}
@@ -199,6 +210,7 @@ title: CampusVFX Alumni Base
     const selectedDiscipline = (filterDiscipline.value || "").toLowerCase();
     const selectedCountry = (filterCountry.value || "").toLowerCase();
     const selectedYear = (filterYear.value || "").toLowerCase();
+    const selectedAvailaibility = (filterAvailaibility.value || "").toLowerCase();
 
     cardsContainer.innerHTML = "";
 
@@ -209,6 +221,7 @@ title: CampusVFX Alumni Base
         const blob = [
           g.Name,
           g.Discipline,
+          g.Availaibility,
           g.Citizenship,
           g.GraduationYear,
           g.PreferredCountry
@@ -218,8 +231,9 @@ title: CampusVFX Alumni Base
         const matchesDiscipline = !selectedDiscipline || String(g.Discipline || "").toLowerCase() === selectedDiscipline;
         const matchesCountry = !selectedCountry || String(g.Citizenship || "").toLowerCase() === selectedCountry;
         const matchesYear = !selectedYear || String(g.GraduationYear || "").toLowerCase() === selectedYear;
+        const matchesAvailaibility = !selectedAvailaibility || String(g.Availaibility || "").toLowerCase() === selectedYear;
 
-        return matchesSearch && matchesDiscipline && matchesCountry && matchesYear;
+        return matchesSearch && matchesDiscipline && matchesCountry && matchesYear && matchesAvailaibility;
       })
       .forEach(g => renderCard(g));
   }
